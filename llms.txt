@@ -1,0 +1,18 @@
+# agentic-treg
+
+Route live data through a catalog with a CLI, npm library, and MCP server.
+
+Library: searchCatalog, getEndpoint, callEndpoint, getBalance, doctor.
+CLI: search, get, call, balance, doctor, mcp.
+MCP: treg_search, treg_get, treg_call, treg_doctor.
+Calls default to dry run with no network activity.
+Live calls require explicit execution and read prices first.
+Anonymous access works where the service allows it.
+Use TREG_TOKEN for authentication.
+Use TREG_ORG_ID for explicit balance organization selection.
+Custom result data is capped at 4000 UTF-8 bytes.
+HTTP and vendor failures throw shared core VendorError.
+
+Docs: https://github.com/pooriaarab/agentic-treg
+API: https://treg.to/llms.txt
+License: MIT
