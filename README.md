@@ -23,13 +23,13 @@ npx agentic-treg call treg.web.extract --params '{"url":"https://example.com"}'
 Search the free catalog.
 
 ```sh
-npx agentic-treg search "search results" --dry-run
+npx agentic-treg search "search results"
 npx agentic-treg get treg.web.extract
 npx agentic-treg doctor
 npx agentic-treg balance
 ```
 
-Search performs a free catalog lookup even with `--dry-run`.
+Search performs a free live catalog lookup.
 Calls default to previews with no network access.
 Set `TREG_TOKEN` for authenticated access.
 Omit it for anonymous access where allowed.
@@ -41,7 +41,7 @@ Doctor exits with failure when any check fails.
 Pass `--live` to execute a call.
 Live calls fetch endpoint details before spending.
 The default live ceiling is one dollar per call.
-The response includes the published price and charged microdollars.
+The response includes the published price as `{value, currency}`, raw `cost`, and charged microdollars.
 
 ```sh
 npx agentic-treg call treg.web.extract --params '{"url":"https://example.com"}' --live
@@ -64,7 +64,8 @@ Pass plain parameters for simple queries or JSON bodies.
 Pass `{ queryParams, pathParams, body }` for mixed inputs.
 Read endpoint details to choose the correct input shape.
 Live calls use the catalog method.
-Results retain up to 4000 UTF-8 bytes of custom data.
+CLI outputs and all MCP tool results retain up to 4000 UTF-8 bytes of custom data.
+Library live call results use the same cap.
 Oversized data becomes a text fragment with `truncated: true`.
 HTTP and vendor failures throw `VendorError` from the shared core.
 Pass core guards through the library call options.

@@ -53,6 +53,24 @@ function asParams(value: unknown): Params {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new GuardError('Query and path parameters must be objects.');
   return value as Params;
 }
+export function truncate(data: unknown) {
+  const serialized = JSON.stringify(data) ?? 'null';
+  const originalBytes = Buffer.byteLength(serialized);
+  const truncated = originalBytes > 4000;
+  if (!truncated) return { data, truncated, originalBytes };
+  let text = Buffer.from(serialized).subarray(0, 4000).toString('utf8');
+  while (Buffer.byteLength(JSON.stringify(text)) > 4000) text = text.slice(0, -1);
+  return { data: text, truncated, originalBytes };
+}
+export function capOutput(data: unknown): unknown {
+  const capped = truncate(data);
+  return capped.truncated ? capped : data;
+}
+export function parsePrice(cost: Record<string, unknown> | undefined) {
+  if (!cost || typeof cost.value !== 'number' || !Number.isFinite(cost.value)) throw new VendorError('Endpoint has no published price.');
+  if (cost.currency !== undefined && cost.currency !== 'USD') throw new VendorError('Endpoint currency must be USD.');
+  return { value: cost.value, currency: cost.currency ?? 'USD' };
+}
 export interface CallOptions { dryRun?: boolean; guards?: Guards; maxCostUsd?: number }
 export async function callEndpoint(id: string, params: Params = {}, options: CallOptions = {}) {
   checkId(id);
@@ -63,7 +81,7 @@ export async function callEndpoint(id: string, params: Params = {}, options: Cal
   if (options.dryRun !== false) return { dryRun: true, id, params, maxCostUsd, network: false };
   const detail = await getEndpoint(id);
   const { endpoint } = detail;
-  if (!endpoint.cost || typeof endpoint.cost !== 'object' || !('usd' in endpoint.cost)) throw new VendorError('Endpoint has no published price.');
+  const price = parsePrice(endpoint.cost);
   const method = endpoint.method?.toUpperCase();
   if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].includes(method)) throw new VendorError('Unsupported endpoint method.');
   const structured = 'queryParams' in params || 'pathParams' in params || 'body' in params;
@@ -74,16 +92,7 @@ export async function callEndpoint(id: string, params: Params = {}, options: Cal
   const { data, response } = await request(`/call/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`, { method, headers: { 'X-Treg-Route-Max-Cost': String(maxCostUsd), ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
   guards.recordDispatch();
   logger.info('Call completed.');
-  const serialized = JSON.stringify(data);
-  const bytes = Buffer.byteLength(serialized);
-  const truncated = bytes > 4000;
-  let result = data;
-  if (truncated) {
-    let text = Buffer.from(serialized).subarray(0, 4000).toString('utf8');
-    while (Buffer.byteLength(JSON.stringify(text)) > 4000) text = text.slice(0, -1);
-    result = text;
-  }
-  return { dryRun: false, id, price: endpoint.cost, data: result, truncated, originalBytes: bytes, callId: response.headers.get('X-Treg-Call-Id'), chargedMicro: response.headers.get('X-Treg-Cost-Micro') };
+  return { dryRun: false, id, price, cost: endpoint.cost, ...truncate(data), callId: response.headers.get('X-Treg-Call-Id'), chargedMicro: response.headers.get('X-Treg-Cost-Micro') };
 }
 export async function getBalance(): Promise<unknown> {
   let orgId = process.env.TREG_ORG_ID;

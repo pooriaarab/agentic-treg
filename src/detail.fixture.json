@@ -1,0 +1,2823 @@
+{
+  "endpoint": {
+    "id": "parallel.web.extract",
+    "provider": "parallel",
+    "provider_display": "Parallel",
+    "name": "Extract web pages",
+    "summary": "Return focused excerpts or full Markdown content from up to 20 public URLs.",
+    "method": "POST",
+    "path": "/v1/extract",
+    "scope": "any_account",
+    "tier": "core",
+    "kind": "data",
+    "domain": "extract",
+    "call_template": "treg call parallel.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"advanced_settings\":{\"full_content\":true}}'",
+    "cost": {
+      "type": "per_success",
+      "value": 0.001,
+      "fallback": {
+        "value": 0.001,
+        "note": "One URL; usage settles each further URL."
+      },
+      "currency": "USD",
+      "unit": "page",
+      "settle": "usage",
+      "usage": {
+        "unit": "usd",
+        "terms": [
+          {
+            "path": "usage[name=sku_extract_excerpts].count",
+            "rate": 0.001
+          }
+        ]
+      },
+      "source": "observed",
+      "source_url": "https://docs.parallel.ai/getting-started/pricing",
+      "checked": "2026-10-09",
+      "confidence": "verified",
+      "note": "$0.001 per extracted URL; full content costs the same. Live: two readable URLs with full content reported usage sku_extract_excerpts 2; one unreachable URL returned errors[] and an empty usage list. The hold is one URL and usage settles the rest.",
+      "usd": 0.001
+    },
+    "async": null,
+    "platform_eligible": true,
+    "platform_blocked": null,
+    "miss": null,
+    "status": null,
+    "status_note": null,
+    "superseded_by": null,
+    "verified": "2026-10-09",
+    "added": "2026-10-09",
+    "docs_url": "https://docs.parallel.ai/extract/extract-quickstart",
+    "has_example": true,
+    "input": {
+      "bodyType": "json",
+      "body": {
+        "urls": {
+          "type": "array[string]",
+          "required": true,
+          "minItems": 1,
+          "maxItems": 20,
+          "example": [
+            "https://example.com"
+          ]
+        },
+        "objective": {
+          "type": "string",
+          "required": false,
+          "note": "What you want from the pages; focuses the excerpts. Up to 5,000 characters."
+        },
+        "search_queries": {
+          "type": "array[string]",
+          "required": false,
+          "note": "Keyword queries that focus the excerpts."
+        },
+        "max_chars_total": {
+          "type": "integer",
+          "required": false,
+          "note": "Upper bound on excerpt characters across all results."
+        },
+        "session_id": {
+          "type": "string",
+          "required": false
+        },
+        "client_model": {
+          "type": "string",
+          "required": false
+        },
+        "advanced_settings": {
+          "type": "object",
+          "required": false,
+          "example": {
+            "full_content": true
+          },
+          "note": "{full_content: true or {max_chars_per_result}, excerpt_settings {max_chars_per_result}, fetch_policy {max_age_seconds >= 600, timeout_seconds, disable_cache_fallback}}. Full content is off by default."
+        }
+      },
+      "note": "A URL that cannot be read returns inside a 200 under errors[] with its error_type and reports no usage. Top-level full_content, excerpts or fetch_policy are rejected; they belong under advanced_settings."
+    },
+    "body_allowlist": true,
+    "test_request": {
+      "body": {
+        "urls": [
+          "https://example.com"
+        ],
+        "advanced_settings": {
+          "full_content": true
+        }
+      }
+    },
+    "capability": "web.extract",
+    "capability_description": "Extract clean content from web pages",
+    "platform": "web",
+    "platform_label": "Open web & SEO data",
+    "observed": {
+      "samples": 155,
+      "decided": 155,
+      "ok_rate": 0.7484,
+      "p50_ms": 11261,
+      "p95_ms": 35526,
+      "last_ok_days": 0,
+      "hit_rate": 0.3377,
+      "hit_samples": 154
+    }
+  },
+  "provider": {
+    "service": "parallel",
+    "display_name": "Parallel",
+    "limits": "Search, Extract and Entity Search each allow 600 requests per minute on a rolling 60-second window. HTTP 429 is a rate limit; HTTP 402 is insufficient credit, which in-flight requests count against.",
+    "pricing_url": "https://docs.parallel.ai/getting-started/pricing",
+    "docs": "https://docs.parallel.ai/getting-started/overview"
+  },
+  "siblings": [
+    {
+      "id": "anyapi.web.scrape",
+      "provider": "anyapi",
+      "provider_display": "AnyAPI",
+      "name": "Web Scrape",
+      "summary": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.",
+      "method": "POST",
+      "path": "/v1/run/web.scrape",
+      "scope": "",
+      "tier": "extended",
+      "kind": "data",
+      "domain": "scrape",
+      "call_template": "treg call anyapi.web.scrape --method POST --data '{\"formats\":[\"markdown\",\"html\"],\"onlyMainContent\":false,\"url\":\"https://example.com\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 0.0009,
+        "currency": "USD",
+        "unit": "call",
+        "reported_charge": {
+          "path": "costUsd",
+          "unit": "usd"
+        },
+        "source": "observed",
+        "source_url": "https://api.getanyapi.com/v1/apis/web.scrape",
+        "checked": "2026-10-02",
+        "confidence": "verified",
+        "usd": 0.0009
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-19",
+      "added": "2026-09-19",
+      "docs_url": "https://getanyapi.com/api/web/scrape",
+      "has_example": true,
+      "input": {
+        "body": {
+          "blockAds": {
+            "type": "boolean",
+            "required": false,
+            "note": "When true (upstream default), strip ad and cookie-consent elements before capture. Set false to keep them."
+          },
+          "excludeTags": {
+            "type": "array",
+            "required": false,
+            "note": "CSS selectors to drop before capture (for example [\"nav\", \"footer\", \".ads\"]). Applied after includeTags."
+          },
+          "formats": {
+            "type": "array",
+            "required": false,
+            "note": "Which representations of the page to return. Any combination of: markdown (page content as Markdown), html (the page HTML exactly as the browser received it, including head and script tags). Each requested format is returned under the matching output field. Defaults to both. rawHtml is a deprecated ",
+            "default": [
+              "markdown",
+              "html"
+            ],
+            "example": [
+              "markdown",
+              "html"
+            ]
+          },
+          "includeTags": {
+            "type": "array",
+            "required": false,
+            "note": "CSS selectors to keep. When set, only content matching these selectors is captured (for example [\"article\", \"main\"] or [\"#content\"])."
+          },
+          "mobile": {
+            "type": "boolean",
+            "required": false,
+            "note": "When true, render the page with a mobile viewport and user agent instead of desktop. Some sites serve materially different content to mobile."
+          },
+          "onlyMainContent": {
+            "type": "boolean",
+            "required": false,
+            "note": "When true, return only the main article content, stripping navigation, headers, footers, and other boilerplate. Defaults to false to capture the full page.",
+            "default": false,
+            "example": false
+          },
+          "url": {
+            "type": "string",
+            "required": true,
+            "note": "The URL of the page to scrape.",
+            "example": "https://example.com"
+          },
+          "waitFor": {
+            "type": "integer",
+            "required": false,
+            "note": "Milliseconds to wait for the page to finish rendering before capture. Use this for JavaScript-heavy pages or single-page apps whose content loads after the initial paint. Capped at 15000 to stay within the request timeout. This wait is time you asked us to spend, so your response takes this much lon",
+            "min": 0,
+            "max": 15000
+          }
+        },
+        "bodyType": "json"
+      },
+      "test_request": {
+        "body": {
+          "formats": [
+            "markdown",
+            "html"
+          ],
+          "onlyMainContent": false,
+          "url": "https://example.com"
+        }
+      },
+      "observed": {
+        "samples": 92932,
+        "decided": 87988,
+        "ok_rate": 0.7715,
+        "p50_ms": 3168,
+        "p95_ms": 26572,
+        "last_ok_days": 0,
+        "hit_rate": 0.765,
+        "hit_samples": 75147
+      },
+      "reviews": {
+        "teams": 5,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Official Claude Code memory documentation contains auto-memory and MEMORY.md index details; used only as background.",
+            "client": "claude-code",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "partly",
+            "reason": "Archive page scraped, but includeTags were ignored and the sidebar rules were not in the output.",
+            "client": "mcp",
+            "month": "2026-09"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Confirmed Cleveragh 8888590 still open with unchanged 24/09/2026 12:00 deadline",
+            "client": "mcp",
+            "month": "2026-09"
+          }
+        ],
+        "share": {
+          "useful": 0.8,
+          "partly": 0.2,
+          "not_useful": 0.0
+        }
+      }
+    },
+    {
+      "id": "branddev.web.scrape",
+      "provider": "branddev",
+      "provider_display": "Context.dev",
+      "name": "Scrape a web page",
+      "summary": "Return one page as Markdown, HTML, images or a screenshot.",
+      "method": "POST",
+      "path": "/web/scrape",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call branddev.web.scrape --method POST --data '{\"url\":\"https://example.com\",\"formats\":{\"markdown\":true}}'",
+      "cost": {
+        "type": "per_success",
+        "value": 1,
+        "fallback": {
+          "value": 1,
+          "note": "The curated request allows one basic output and no charged extras."
+        },
+        "currency": "credit",
+        "per": 1,
+        "unit": "call",
+        "settle": "usage",
+        "usage": {
+          "path": "key_metadata.credits_consumed",
+          "unit": "credit"
+        },
+        "source": "observed",
+        "source_url": "https://docs.context.dev/account/credits",
+        "checked": "2026-09-28",
+        "confidence": "verified",
+        "note": "One basic Markdown request consumed one credit live; the current rate card prices the other basic formats at the same base. Settle from reported credits.",
+        "usd": 0.002534
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-28",
+      "added": "2026-09-28",
+      "docs_url": "https://docs.context.dev/api-reference/web-scraping/scrape",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "formats": {
+            "type": "object",
+            "required": true,
+            "enum": [
+              {
+                "markdown": true
+              },
+              {
+                "html": true
+              },
+              {
+                "images": true
+              },
+              {
+                "screenshot": true
+              }
+            ],
+            "example": {
+              "markdown": true
+            },
+            "note": "Choose one basic output; charged JSON, highlights, product and PDF OCR options are excluded."
+          },
+          "maxAgeMs": {
+            "type": "integer",
+            "required": false,
+            "min": 0,
+            "max": 31536000000,
+            "note": "Maximum cache age in milliseconds; 0 fetches fresh."
+          }
+        },
+        "note": "The curated request permits one basic format. Browser actions and charged extraction options require an own raw tool. A target 404 may still consume the base credit."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "formats": {
+            "markdown": true
+          }
+        }
+      },
+      "observed": {
+        "samples": 3823,
+        "decided": 3820,
+        "ok_rate": 0.9411,
+        "p50_ms": 694,
+        "p95_ms": 89129,
+        "last_ok_days": 0,
+        "hit_rate": 0.198,
+        "hit_samples": 3813
+      }
+    },
+    {
+      "id": "crawl4ai.web.scrape",
+      "provider": "crawl4ai",
+      "provider_display": "Crawl4AI",
+      "name": "Scrape or crawl a web page to clean Markdown for LLMs",
+      "summary": "Scrape one URL, a web page or a PDF, into clean, LLM-ready Markdown text and/or HTML. Crawl4AI picks the cheapest engine that works (archive, plain fetch, real browser that renders JavaScript), with optional links, media, metadata and tables; proxies for sites that block datacenters.",
+      "method": "POST",
+      "path": "/scrape",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call crawl4ai.web.scrape --method POST --data '{\"url\":\"https://example.com\",\"format\":\"md\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 0.15,
+        "currency": "credit",
+        "per": 1,
+        "unit": "page",
+        "source": "observed",
+        "source_url": "https://api.crawl4ai.com/v1/prices",
+        "checked": "2026-10-08",
+        "confidence": "verified",
+        "note": "treg's account price: a flat 0.15 credits per page at every effort (archived, plain, PDF, browser, hard); failures free. The x-c4-cost header settles the charge (0.150 observed live 2026-10-08 at efforts 0, 1, 2 and 3).",
+        "usd": 0.00015
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "not_found": {
+        "status": [
+          404,
+          410
+        ],
+        "means": "the site itself answered 404 or 410: the page does not exist"
+      },
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-10-05",
+      "added": "2026-10-06",
+      "docs_url": "https://crawl4ai.com/llms.txt",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "format": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "both",
+              "md",
+              "html"
+            ],
+            "default": "both",
+            "example": "md"
+          },
+          "proxy": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "none",
+              "isp",
+              "residential"
+            ],
+            "default": "none",
+            "note": "exit network for sites that block datacenters"
+          },
+          "country": {
+            "type": "string",
+            "required": false,
+            "note": "two-letter exit country for isp/residential, e.g. us"
+          },
+          "parse": {
+            "type": "object",
+            "required": false,
+            "note": "true for all, or pick {links, media, metadata, tables}"
+          }
+        },
+        "note": "Most pages answer in 1-2 s; a page that needs a real browser takes 10-30 s, and a failed page ends within about 55 s. A PDF URL returns the PDF's text as Markdown. Images and other binary files answer 422 binary-body within about a second, free. Blocked (403), unreachable (502) and fleet-busy (503) answers are free; retry a 503 after a few seconds."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "format": "md"
+        }
+      },
+      "observed": {
+        "samples": 304532,
+        "decided": 192835,
+        "ok_rate": 0.8113,
+        "p50_ms": 918,
+        "p95_ms": 16399,
+        "last_ok_days": 0,
+        "hit_rate": 0.9366,
+        "hit_samples": 166442
+      },
+      "reviews": {
+        "teams": 5,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Live WhatsApp-marketing list exposed low-competition verification jobs (2-5 bids) vs saturated Salla design.",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Cheap clean markdown of a trade-data page, including the shipment table.",
+            "client": "claude-code",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Returned the full product page as readable markdown in under a second on plain fetch.",
+            "client": "mcp",
+            "month": "2026-10"
+          }
+        ],
+        "share": {
+          "useful": 1.0,
+          "partly": 0.0,
+          "not_useful": 0.0
+        }
+      }
+    },
+    {
+      "id": "exa.web.contents.get",
+      "provider": "exa",
+      "provider_display": "Exa",
+      "name": "Get page contents by URL",
+      "summary": "Get the full page contents, summaries, and metadata for a list of URLs.",
+      "method": "POST",
+      "path": "/contents",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "contents",
+      "call_template": "treg call exa.web.contents.get --method POST --data '{\"urls\":[\"https://en.wikipedia.org/wiki/Hierarchical_navigable_small_world\"],\"text\":{\"maxCharacters\":2000}}'",
+      "cost": {
+        "type": "per_result",
+        "value": 1,
+        "currency": "USD",
+        "per": 1000,
+        "unit": "page",
+        "source": "observed",
+        "source_url": "https://exa.ai/pricing",
+        "checked": "2026-08-27",
+        "confidence": "verified",
+        "note": "$0.001 per page PER CONTENT TYPE: text, highlights and summary are each billed separately (OBSERVED 2026-08-27: text on one page → costDollars.total 0.001; highlights+summary on one page → 0.002 as {highlights: 0.001, summary: 0.001}). A failed URL is not billed. Platform billing settles the exact costDollars.total.",
+        "usd": 0.001
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-08-27",
+      "added": "2026-08-27",
+      "docs_url": "https://docs.exa.ai/reference/get-contents",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "note": "one or more page URLs; each page is billed per content type requested",
+            "example": [
+              "https://en.wikipedia.org/wiki/Hierarchical_navigable_small_world"
+            ]
+          },
+          "text": {
+            "type": "boolean|object",
+            "required": false,
+            "note": "true, or {maxCharacters: N} — the page as clean text. $0.001 per page",
+            "example": {
+              "maxCharacters": 2000
+            }
+          },
+          "highlights": {
+            "type": "object",
+            "required": false,
+            "note": "{query, maxCharacters, numSentences} — the passages most relevant to `query`. $0.001 per page"
+          },
+          "summary": {
+            "type": "object",
+            "required": false,
+            "note": "{query} — an AI summary of the page focused on `query`. $0.001 per page"
+          },
+          "maxAgeHours": {
+            "type": "integer",
+            "required": false,
+            "note": "serve cache if younger than this, else live-crawl; omit for Exa's default freshness"
+          },
+          "livecrawlTimeout": {
+            "type": "integer",
+            "required": false,
+            "note": "ms, default 10000"
+          },
+          "subpages": {
+            "type": "integer",
+            "required": false,
+            "note": "also crawl N linked subpages (each billed as a page)"
+          }
+        },
+        "note": "each result carries url, title, author, publishedDate and whichever of text / highlights / summary was asked for; `statuses` says per URL whether it came from cache or a live crawl, or failed. Request only the content types you need — each one is a separate $0.001 per page."
+      },
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://en.wikipedia.org/wiki/Hierarchical_navigable_small_world"
+          ],
+          "text": {
+            "maxCharacters": 2000
+          }
+        }
+      },
+      "observed": {
+        "samples": 80615,
+        "decided": 80517,
+        "ok_rate": 0.9956,
+        "p50_ms": 106,
+        "p95_ms": 9028,
+        "last_ok_days": 0,
+        "hit_rate": 0.9272,
+        "hit_samples": 62876
+      },
+      "reviews": {
+        "teams": 10,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Retrieved the requested DeepWiki architecture overview and the pinned source README after direct page access failed. Subpages returned source files rather than deeper wiki chapters.",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Per-URL crawl status clearly identified an unavailable old announcement, preventing use of an unverified funding record.",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Returned full funding articles for Furo, OuterSignal, Sovera with amounts, investors, and product detail needed for ICP evaluation.",
+            "client": "mcp",
+            "month": "2026-10"
+          }
+        ],
+        "share": {
+          "useful": 0.85,
+          "partly": 0.15,
+          "not_useful": 0.01
+        }
+      }
+    },
+    {
+      "id": "firecrawl.web.scrape",
+      "provider": "firecrawl",
+      "provider_display": "Firecrawl",
+      "name": "Scrape a web page",
+      "summary": "Fetch one page as Markdown, HTML or links.",
+      "method": "POST",
+      "path": "/v2/scrape",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call firecrawl.web.scrape --method POST --data '{\"url\":\"https://example.com\",\"formats\":[\"markdown\"],\"maxAge\":0,\"parsers\":[]}'",
+      "cost": {
+        "type": "per_success",
+        "value": 1,
+        "currency": "credit",
+        "per": 1,
+        "unit": "page",
+        "source": "observed",
+        "source_url": "https://docs.firecrawl.dev/billing",
+        "checked": "2026-09-28",
+        "confidence": "verified",
+        "note": "One basic page costs one credit with parsers: []; a PDF is returned as base64. Firecrawl bills a returned target 403/404 document, but no-document failures are free.",
+        "usd": 0.005
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-28",
+      "added": "2026-09-28",
+      "docs_url": "https://docs.firecrawl.dev/api-reference/endpoint/scrape",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "formats": {
+            "type": "array[string]",
+            "required": false,
+            "minItems": 1,
+            "maxItems": 3,
+            "enum": [
+              "markdown",
+              "html",
+              "links"
+            ],
+            "example": [
+              "markdown"
+            ]
+          },
+          "onlyMainContent": {
+            "type": "boolean",
+            "required": false,
+            "default": true
+          },
+          "maxAge": {
+            "type": "integer",
+            "required": false,
+            "min": 0,
+            "max": 172800000,
+            "example": 0
+          },
+          "parsers": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 0,
+            "maxItems": 0,
+            "example": []
+          }
+        },
+        "note": "Pass parsers: [] to keep PDF URLs at the flat one-credit rate; PDF content is then returned as base64. JSON, question, highlights, threat scans and other charged options are excluded. A target 403/404 document is billable; an upstream request with no document is free."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "formats": [
+            "markdown"
+          ],
+          "maxAge": 0,
+          "parsers": []
+        }
+      },
+      "observed": {
+        "samples": 43003,
+        "decided": 42841,
+        "ok_rate": 0.7942,
+        "p50_ms": 2296,
+        "p95_ms": 6869,
+        "last_ok_days": 0,
+        "hit_rate": 0.931,
+        "hit_samples": 33921
+      },
+      "reviews": {
+        "teams": 5,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Medium publication search page scraped cleanly with titles and dates",
+            "client": "claude-code",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Official Invasão campaign rules with codes and dates",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "partly",
+            "reason": "Useful first-party product positioning and workflow examples; no public evidence of ChatGPT directory acquisition or conversion performance.",
+            "client": "mcp",
+            "month": "2026-10"
+          }
+        ],
+        "share": {
+          "useful": 0.76,
+          "partly": 0.22,
+          "not_useful": 0.02
+        }
+      }
+    },
+    {
+      "id": "keenable.web.fetch",
+      "provider": "keenable",
+      "provider_display": "Keenable",
+      "name": "Fetch page content",
+      "summary": "Fetch an indexed or live webpage as Markdown, optionally reduced by an extraction instruction.",
+      "method": "GET",
+      "path": "/v1/fetch",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call keenable.web.fetch --query url=https://docs.keenable.ai/ --query max_chars=500 --query live=false",
+      "cost": {
+        "type": "per_call",
+        "value": 0.004,
+        "currency": "USD",
+        "per": 1,
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://app.keenable.ai/console",
+        "checked": "2026-09-23",
+        "confidence": "verified",
+        "note": "The configured purchased package costs $4 per 1,000 requests. Keenable documents one credit per authenticated search or fetch, including both search modes and indexed/live fetch; no evidence says rejected requests are free, so platform calls are metered per request. BYOK calls are unmetered by treg.",
+        "usd": 0.004
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-23",
+      "added": "2026-09-23",
+      "docs_url": "https://docs.keenable.ai/api-reference/fetch",
+      "has_example": true,
+      "input": {
+        "queryParams": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://docs.keenable.ai/"
+          },
+          "max_chars": {
+            "type": "integer",
+            "required": false,
+            "default": 50000,
+            "min": 1,
+            "example": 5000,
+            "note": "Longer content is truncated and a notice is appended after the cut."
+          },
+          "live": {
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "note": "Fetch directly from the source instead of using the indexed copy; also supports URLs absent from the index."
+          },
+          "prompt": {
+            "type": "string",
+            "required": false,
+            "maxLength": 2000,
+            "example": "List the API endpoints.",
+            "note": "Return only the extraction requested here instead of the full page."
+          }
+        },
+        "note": "The live response returned published_at as a Unix timestamp even though the OpenAPI schema says string; treg relays the provider value unchanged."
+      },
+      "strict_query": true,
+      "test_request": {
+        "queryParams": {
+          "url": "https://docs.keenable.ai/",
+          "max_chars": 500,
+          "live": false
+        }
+      },
+      "observed": {
+        "samples": 4566,
+        "decided": 4121,
+        "ok_rate": 0.1439,
+        "p50_ms": 281,
+        "p95_ms": 5035,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 592
+      }
+    },
+    {
+      "id": "limadata.web.extract",
+      "provider": "limadata",
+      "provider_display": "LimaData",
+      "name": "Extract web pages",
+      "summary": "Extract clean Markdown content, metadata, links, and images from up to ten URLs.",
+      "method": "POST",
+      "path": "/api/v1/research/extract",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "web",
+      "call_template": "treg call limadata.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"render_js\":false}'",
+      "cost": {
+        "type": "per_result",
+        "value": 0.2,
+        "currency": "credit",
+        "per": 1,
+        "unit": "page",
+        "source": "docs",
+        "source_url": "https://api.limadata.com/docs/basic_v2",
+        "checked": "2026-09-17",
+        "confidence": "verified",
+        "note": "BYOK only. Each URL costs 0.1 credit without JavaScript rendering or 0.2 with it; 0.2 is the documented maximum.",
+        "usd": 0.004
+      },
+      "async": null,
+      "platform_eligible": false,
+      "platform_blocked": "URL count and JavaScript rendering change the charge; connect your own LimaData key.",
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-17",
+      "added": "2026-09-17",
+      "docs_url": "https://api.limadata.com/docs/basic_v2",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "include_links": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_images": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "render_js": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          }
+        }
+      },
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "render_js": false
+        }
+      },
+      "observed": {
+        "samples": 0,
+        "decided": 0,
+        "ok_rate": null,
+        "p50_ms": null,
+        "p95_ms": null,
+        "last_ok_days": null,
+        "hit_rate": null,
+        "hit_samples": 0
+      }
+    },
+    {
+      "id": "linkup.web.fetch",
+      "provider": "linkup",
+      "provider_display": "Linkup",
+      "name": "Fetch a web page",
+      "summary": "Retrieve clean Markdown from a public HTML or PDF URL.",
+      "method": "POST",
+      "path": "/v1/fetch",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call linkup.web.fetch --method POST --data '{\"url\":\"https://example.com\",\"mode\":\"standard\",\"renderJs\":false}'",
+      "cost": {
+        "type": "per_success",
+        "table": [
+          {
+            "when": {
+              "body.mode": "standard",
+              "body.renderJs": false
+            },
+            "value": 0.001
+          },
+          {
+            "when": {
+              "body.mode": "standard",
+              "body.renderJs": true
+            },
+            "value": 0.005
+          },
+          {
+            "when": {
+              "body.mode": "pro",
+              "body.renderJs": false
+            },
+            "value": 0.005
+          },
+          {
+            "when": {
+              "body.mode": "pro",
+              "body.renderJs": true
+            },
+            "value": 0.01
+          }
+        ],
+        "fallback": {
+          "value": 0.01,
+          "note": "Maximum Markdown-only Fetch price."
+        },
+        "currency": "USD",
+        "unit": "call",
+        "source": "docs",
+        "source_url": "https://docs.linkup.so/pages/documentation/platform/pricing",
+        "checked": "2026-09-29",
+        "confidence": "documented",
+        "note": "Markdown Fetch is billed per successful request by mode and JavaScript rendering.",
+        "table_min": 0.001,
+        "usd": 0.01,
+        "usd_min": 0.001
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-29",
+      "added": "2026-09-28",
+      "docs_url": "https://docs.linkup.so/pages/documentation/endpoints/fetch/reference",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "mode": {
+            "type": "string",
+            "required": false,
+            "default": "standard",
+            "enum": [
+              "standard",
+              "pro"
+            ]
+          },
+          "renderJs": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "extractImages": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          }
+        },
+        "note": "Structured output has a separate catalog tool because providing schema adds $0.001 to any mode and renderJs combination. A team's own raw tool can request raw page bytes."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "mode": "standard",
+          "renderJs": false
+        }
+      },
+      "observed": {
+        "samples": 3184,
+        "decided": 2545,
+        "ok_rate": 0.9996,
+        "p50_ms": 1170,
+        "p95_ms": 5563,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 2544
+      },
+      "reviews": {
+        "teams": 0,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Returned the full article text from a news page that blocks plain curl with 403, which was enough to check the headline, date and figures.",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Returned the full official Udemy revenue-share text including the exact 97%/37% split — the single fact the whole contrarian card rests on.",
+            "client": "mcp",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "id": "litescrape.web.fetch",
+      "provider": "litescrape",
+      "provider_display": "Litescrape",
+      "name": "Fetch rendered web content",
+      "summary": "Fetch a public HTTP(S) page and return LLM-ready content",
+      "method": "GET",
+      "path": "/api/web/fetch",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call litescrape.web.fetch --query url=https://example.com --query respond_with=markdown",
+      "cost": {
+        "type": "per_success",
+        "value": 0.00015,
+        "currency": "USD",
+        "per": 1,
+        "unit": "call",
+        "source": "docs",
+        "source_url": "https://litescrape.com/pricing",
+        "checked": "2026-09-29",
+        "confidence": "verified",
+        "note": "One successful API response consumes one prepaid call; failures are free.",
+        "usd": 0.00015
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-29",
+      "added": "2026-09-29",
+      "docs_url": "https://litescrape.com/docs/reference",
+      "has_example": true,
+      "input": {
+        "queryParams": {
+          "assert_status_code": {
+            "type": "integer",
+            "required": false,
+            "min": 100,
+            "max": 599,
+            "example": 200,
+            "note": "Expected origin HTTP status, 100-599. A different status is rejected; otherwise a rendered error page is a successful capture."
+          },
+          "base": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "initial",
+              "final"
+            ],
+            "note": "Resolve relative links against the requested URL (initial, default) or the final URL after redirects (final)."
+          },
+          "detach_invisibles": {
+            "type": "boolean",
+            "required": false,
+            "note": "Drop display:none elements from the page."
+          },
+          "engine": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "auto",
+              "browser",
+              "curl"
+            ],
+            "note": "auto (default; lightweight HTTP first, a browser when needed), browser, or curl (no JavaScript)."
+          },
+          "keep_img_data_url": {
+            "type": "boolean",
+            "required": false,
+            "note": "Keep inline data: images in Markdown."
+          },
+          "locale": {
+            "type": "string",
+            "required": false,
+            "minLength": 2,
+            "maxLength": 64,
+            "example": "en-US",
+            "note": "Browser locale as a language tag, 2-64 characters. Defaults to the browser's own."
+          },
+          "markdown_chunking": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "true",
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "structured",
+              "s1",
+              "s2",
+              "s3",
+              "s4",
+              "s5"
+            ],
+            "note": "true, h1-h5, structured or s1-s5: split the Markdown and return chunks."
+          },
+          "max_tokens": {
+            "type": "integer",
+            "required": false,
+            "min": 500,
+            "max": 10000000,
+            "note": "Integer 500-10,000,000. Trim content to this many tokens."
+          },
+          "no_gfm": {
+            "type": "string",
+            "required": false,
+            "note": "true, false or table: disable GitHub-flavored Markdown, or only its tables."
+          },
+          "page_timeout": {
+            "type": "integer",
+            "required": false,
+            "min": 1,
+            "max": 180,
+            "example": 30,
+            "note": "Seconds from 1 through 180 for page loading and browser operations. Cannot extend the total request budget set by timeout."
+          },
+          "preset": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "reader",
+              "index",
+              "research",
+              "agent",
+              "spider"
+            ],
+            "note": "Option preset. Fills only the options the request leaves unset."
+          },
+          "referer": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 8192,
+            "example": "https://example.com",
+            "note": "HTTP(S) URL sent as the Referer."
+          },
+          "remove_overlay": {
+            "type": "boolean",
+            "required": false,
+            "note": "Remove modal and cookie-banner overlays from the page."
+          },
+          "remove_selector": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 2048,
+            "example": "nav, footer",
+            "note": "CSS selector removed before extraction, 1-2,048 characters; POST also accepts a list of 1-16 selectors."
+          },
+          "respond_timing": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "html",
+              "visible-content",
+              "mutation-idle",
+              "resource-idle",
+              "media-idle",
+              "network-idle"
+            ],
+            "example": "network-idle",
+            "note": "Page readiness condition to reach before responding."
+          },
+          "respond_with": {
+            "type": "string",
+            "required": false,
+            "minLength": 3,
+            "maxLength": 64,
+            "example": "markdown",
+            "note": "Output format: content (default; main content as Markdown, or the whole page when extraction keeps too little), markdown (whole page as Markdown), html, text, frontmatter (content plus front matter), or a '+' combination such as markdown+frontmatter. For screenshots use /api/web/screenshot."
+          },
+          "retain_images": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "none",
+              "all",
+              "alt"
+            ],
+            "example": "alt",
+            "note": "Images to keep: all (default), alt (alt text only) or none."
+          },
+          "retain_links": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "none",
+              "all",
+              "text",
+              "gpt-oss"
+            ],
+            "note": "Links to keep: all (default), text (link text only), none, or gpt-oss (citation format with a links summary)."
+          },
+          "retain_media": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "none",
+              "text",
+              "link",
+              "image",
+              "html"
+            ],
+            "note": "How video, audio and embedded video appear: none, text, link (default), image or html."
+          },
+          "robots_txt": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 256,
+            "example": "MyBot",
+            "note": "User agent, 1-256 characters, to check against the site's robots.txt; disallowed URLs are rejected."
+          },
+          "target_selector": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 2048,
+            "example": "article",
+            "note": "CSS selector to extract, 1-2,048 characters; POST also accepts a list of 1-16 selectors. Implies waiting for the selector. Match-all selectors are rejected."
+          },
+          "token_budget": {
+            "type": "integer",
+            "required": false,
+            "min": 1,
+            "max": 10000000,
+            "note": "Integer 1-10,000,000. Reject the page when its token count exceeds the budget."
+          },
+          "url": {
+            "type": "string",
+            "required": true,
+            "minLength": 1,
+            "maxLength": 8192,
+            "example": "https://example.com",
+            "note": "Public HTTP(S) URL to capture, 1-8,192 characters. Include http:// or https://; bare domains are rejected. The host must be public, on port 80 or 443, without embedded credentials."
+          },
+          "user_agent": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 1024,
+            "note": "User-Agent for the page request, 1-1,024 characters without control characters. Defaults to the browser's own."
+          },
+          "wait_for_selector": {
+            "type": "string",
+            "required": false,
+            "minLength": 1,
+            "maxLength": 2048,
+            "example": "main",
+            "note": "CSS selector to wait for after navigation, 1-2,048 characters. POST also accepts a list of 1-16 selectors."
+          },
+          "with_iframe": {
+            "type": "string",
+            "required": false,
+            "note": "true, false or quoted: include iframe content before extraction."
+          },
+          "with_images_summary": {
+            "type": "boolean",
+            "required": false,
+            "note": "Add an images list to the response."
+          },
+          "with_links_summary": {
+            "type": "string",
+            "required": false,
+            "note": "true, false or all: add a links list to the response."
+          },
+          "with_shadow_dom": {
+            "type": "boolean",
+            "required": false,
+            "note": "Include open shadow DOM content before extraction."
+          },
+          "timeout": {
+            "type": "number",
+            "required": false,
+            "max": 90.0,
+            "note": "Optional budget for the entire request in seconds, measured from gateway receipt until the response is ready to send. Includes admission, queueing and settlement. Must be greater than 0 and at most 90. On expiry, the call is not billed and returns 503 request_deadline_exceeded with retryable=true and a request ID. Omit to retain the standard server deadline."
+          }
+        }
+      },
+      "strict_query": true,
+      "test_request": {
+        "queryParams": {
+          "url": "https://example.com",
+          "respond_with": "markdown"
+        }
+      },
+      "observed": {
+        "samples": 11766,
+        "decided": 10500,
+        "ok_rate": 0.9152,
+        "p50_ms": 7730,
+        "p95_ms": 28087,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 33
+      }
+    },
+    {
+      "id": "octen.web.extract",
+      "provider": "octen",
+      "provider_display": "Octen",
+      "name": "Extract pages by URL — content and classification",
+      "summary": "Extract clean content or highlights from up to twenty URLs, with per-URL status and mode.",
+      "method": "POST",
+      "path": "/extract",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call octen.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"mode\":\"standard\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 2.5,
+        "currency": "USD",
+        "per": 1000,
+        "unit": "page",
+        "octen_rates": {
+          "standard": 0.001,
+          "advanced": 0.0025
+        },
+        "source": "docs",
+        "source_url": "https://octen.ai/pricing",
+        "checked": "2026-09-30",
+        "confidence": "documented",
+        "note": "Conservative original prices: $0.001 per successful standard URL or $0.0025 per successful advanced URL. Failed URLs are free. Shared-key calls hold the advanced maximum and settle from this response's meta.usage.successful_by_mode, including auto-resolved modes.",
+        "usd": 0.0025
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": null,
+      "added": "2026-09-29",
+      "docs_url": "https://docs.octen.ai/api-reference/extract",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 20,
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "required": false,
+            "default": "standard",
+            "enum": [
+              "standard",
+              "advanced",
+              "auto"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "required": false,
+            "note": "Return intent-focused highlights instead of complete page content."
+          },
+          "max_age_seconds": {
+            "type": "integer",
+            "required": false,
+            "default": 86400,
+            "min": 300,
+            "max": 31536000
+          },
+          "format": {
+            "type": "string",
+            "required": false,
+            "default": "markdown",
+            "enum": [
+              "markdown",
+              "text"
+            ]
+          },
+          "timeout": {
+            "type": "integer",
+            "required": false,
+            "default": 30,
+            "min": 1,
+            "max": 60
+          },
+          "include_images": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_videos": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_audio": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_links": {
+            "type": "object",
+            "required": false
+          }
+        }
+      },
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "mode": "standard"
+        }
+      },
+      "observed": {
+        "samples": 58,
+        "decided": 58,
+        "ok_rate": 1.0,
+        "p50_ms": 1833,
+        "p95_ms": 13424,
+        "last_ok_days": 2,
+        "hit_rate": 0.6379,
+        "hit_samples": 58
+      }
+    },
+    {
+      "id": "olostep.web.scrape",
+      "provider": "olostep",
+      "provider_display": "Olostep",
+      "name": "Scrape a web page",
+      "summary": "Fetch one page as clean Markdown, HTML, text or a hosted screenshot.",
+      "method": "POST",
+      "path": "/v1/scrapes",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call olostep.web.scrape --method POST --data '{\"url_to_scrape\":\"https://example.com\",\"formats\":[\"markdown\"],\"max_age\":604800}'",
+      "cost": {
+        "type": "per_call",
+        "value": 1,
+        "currency": "credit",
+        "per": 1,
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://docs.olostep.com/features/scrapes",
+        "checked": "2026-09-23",
+        "confidence": "verified",
+        "note": "A standard scrape costs one credit per request. A live cached-eligible scrape returned credits_consumed: 1 and reduced the account balance by one credit; no evidence says rejected requests are free. BYOK calls remain unmetered by treg.",
+        "usd": 0.002
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-23",
+      "added": "2026-09-23",
+      "docs_url": "https://docs.olostep.com/api-reference/scrapes/create",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url_to_scrape": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "formats": {
+            "type": "array[string]",
+            "required": false,
+            "minItems": 1,
+            "maxItems": 4,
+            "enum": [
+              "html",
+              "markdown",
+              "text",
+              "screenshot"
+            ],
+            "example": [
+              "markdown"
+            ],
+            "note": "Structured parsers, JSON extraction and llm_extract are deliberately excluded because they have separate variable credit prices."
+          },
+          "max_age": {
+            "type": "integer",
+            "required": false,
+            "default": 0,
+            "min": 0,
+            "max": 604800,
+            "note": "Reuse an Olostep scrape no older than this many seconds; 0 requests a fresh scrape."
+          },
+          "remove_images": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "transformer": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "postlight",
+              "none"
+            ]
+          },
+          "links_on_page": {
+            "type": "object",
+            "required": false,
+            "properties": {
+              "query_to_order_links_by": {
+                "type": "string",
+                "required": false
+              },
+              "include_links": {
+                "type": "array[string]",
+                "required": false
+              },
+              "exclude_links": {
+                "type": "array[string]",
+                "required": false
+              }
+            }
+          }
+        },
+        "note": "This is the fixed one-credit surface. Olostep parsers and LLM extraction are not accepted by this catalog tool; a team can call them directly through its own raw Olostep tool."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url_to_scrape": "https://example.com",
+          "formats": [
+            "markdown"
+          ],
+          "max_age": 604800
+        }
+      },
+      "observed": {
+        "samples": 13674,
+        "decided": 9766,
+        "ok_rate": 0.6138,
+        "p50_ms": 7137,
+        "p95_ms": 23275,
+        "last_ok_days": 0,
+        "hit_rate": 0.9957,
+        "hit_samples": 6007
+      },
+      "reviews": {
+        "teams": 0,
+        "samples": [
+          {
+            "usefulness": "useful",
+            "reason": "Returned a GovTribe vendor page (UEI, NAICS, SAM dates) that TinyFish, Firecrawl and Exa livecrawl were all bot-blocked on.",
+            "client": "mcp",
+            "month": "2026-09"
+          },
+          {
+            "usefulness": "partly",
+            "reason": "Confirmed orzeczenia.ms.gov.pl sits behind an anti-bot CAPTCHA for external proxies too — useful diagnostics, no content obtained.",
+            "client": "mcp",
+            "month": "2026-09"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Got full official Pad 2 display specs cleanly",
+            "client": "mcp",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scrapegraphai.web.extract",
+      "provider": "scrapegraphai",
+      "provider_display": "ScrapeGraphAI",
+      "name": "Extract structured data from one page",
+      "summary": "Fetch one public HTML page and use a natural-language prompt to return structured JSON.",
+      "method": "POST",
+      "path": "/api/extract",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call scrapegraphai.web.extract --method POST --data '{\"url\":\"https://example.com\",\"prompt\":\"Extract the page title and purpose.\",\"schema\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"purpose\":{\"type\":\"string\"}},\"required\":[\"title\"]},\"allowedTypes\":[\"text/html\"]}'",
+      "cost": {
+        "type": "per_success",
+        "value": 5,
+        "currency": "credit",
+        "per": 1,
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://scrapegraphai.com/pricing",
+        "checked": "2026-09-24",
+        "confidence": "verified",
+        "note": "HTML extraction costs five credits without stealth. A live call reduced the balance by exactly five credits; failed requests are documented as free.",
+        "usd": 0.02
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-24",
+      "added": "2026-09-24",
+      "docs_url": "https://docs.scrapegraphai.com/api-reference/endpoint/extract",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "prompt": {
+            "type": "string",
+            "required": true,
+            "example": "Extract the page title and purpose."
+          },
+          "schema": {
+            "type": "object",
+            "required": false,
+            "note": "Optional JSON Schema for the returned json field."
+          },
+          "mode": {
+            "type": "string",
+            "required": false,
+            "default": "normal",
+            "enum": [
+              "normal",
+              "reader",
+              "prune"
+            ]
+          },
+          "allowedTypes": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 1,
+            "enum": [
+              "text/html"
+            ],
+            "example": [
+              "text/html"
+            ],
+            "note": "HTML-only keeps PDF page billing out of the fixed five-credit platform price."
+          }
+        },
+        "note": "Raw HTML/Markdown sources, custom fetch configuration and PDFs remain available through a team's raw BYOK tool."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "prompt": "Extract the page title and purpose.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "purpose": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          "allowedTypes": [
+            "text/html"
+          ]
+        }
+      },
+      "observed": {
+        "samples": 133,
+        "decided": 132,
+        "ok_rate": 0.9773,
+        "p50_ms": 8730,
+        "p95_ms": 18117,
+        "last_ok_days": 2,
+        "hit_rate": null,
+        "hit_samples": 0
+      }
+    },
+    {
+      "id": "scrapegraphai.web.scrape",
+      "provider": "scrapegraphai",
+      "provider_display": "ScrapeGraphAI",
+      "name": "Scrape one web page as Markdown",
+      "summary": "Fetch one public HTML page and return clean Markdown.",
+      "method": "POST",
+      "path": "/api/scrape",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call scrapegraphai.web.scrape --method POST --data '{\"url\":\"https://example.com\",\"formats\":[{\"type\":\"markdown\"}],\"allowedTypes\":[\"text/html\"]}'",
+      "cost": {
+        "type": "per_success",
+        "value": 1,
+        "currency": "credit",
+        "per": 1,
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://scrapegraphai.com/pricing",
+        "checked": "2026-09-24",
+        "confidence": "verified",
+        "note": "A Markdown-only HTML scrape costs one credit. A live call reduced the account balance by exactly one credit; failed requests are documented as free.",
+        "usd": 0.004
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-24",
+      "added": "2026-09-24",
+      "docs_url": "https://docs.scrapegraphai.com/api-reference/endpoint/scrape",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "formats": {
+            "type": "array[object]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 1,
+            "enum": [
+              {
+                "type": "markdown"
+              }
+            ],
+            "example": [
+              {
+                "type": "markdown"
+              }
+            ],
+            "note": "This catalog tool fixes the only format to Markdown; use your own raw tool for multi-format, screenshot, JSON or branding requests."
+          },
+          "allowedTypes": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 1,
+            "enum": [
+              "text/html"
+            ],
+            "example": [
+              "text/html"
+            ],
+            "note": "HTML-only keeps PDF page billing out of the fixed one-credit platform price."
+          }
+        },
+        "note": "Custom headers, cookies, stealth, PDFs and additional formats are deliberately excluded from this bounded catalog tool. A raw BYOK tool retains the full upstream API."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "formats": [
+            {
+              "type": "markdown"
+            }
+          ],
+          "allowedTypes": [
+            "text/html"
+          ]
+        }
+      },
+      "observed": {
+        "samples": 4268,
+        "decided": 1898,
+        "ok_rate": 0.6275,
+        "p50_ms": 2488,
+        "p95_ms": 14817,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 1191
+      }
+    },
+    {
+      "id": "search1api.web.crawl",
+      "provider": "search1api",
+      "provider_display": "Search1API",
+      "name": "Read a web page",
+      "summary": "Return clean text and metadata from one public URL.",
+      "method": "POST",
+      "path": "/crawl",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call search1api.web.crawl --method POST --data '{\"url\":\"https://example.com\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 1,
+        "currency": "credit",
+        "unit": "call",
+        "source": "docs",
+        "source_url": "https://s1.dev/docs/essentials/credits-and-limits",
+        "checked": "2026-09-30",
+        "confidence": "documented",
+        "note": "One credit on HTTP 200, including zero results; errors consume no credit.",
+        "usd": 0.001
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-30",
+      "added": "2026-09-30",
+      "docs_url": "https://s1.dev/docs/basic/crawl",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "enableFallback": {
+            "type": "boolean",
+            "required": false,
+            "default": true
+          }
+        },
+        "note": "A target page's 404 or 410 costs Search1API one credit; treg cannot prove that charge from the error body, so its shared tier absorbs it."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com"
+        }
+      },
+      "observed": {
+        "samples": 17679,
+        "decided": 12987,
+        "ok_rate": 0.6868,
+        "p50_ms": 5121,
+        "p95_ms": 9840,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 8920
+      }
+    },
+    {
+      "id": "serper.web.extract",
+      "provider": "serper",
+      "provider_display": "Serper",
+      "name": "Extract a web page",
+      "summary": "Fetch one public web page and return clean text plus optional Markdown, links, images, videos, and metadata.",
+      "method": "POST",
+      "path": "/",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call serper.web.extract --method POST --data '{\"url\":\"https://example.com\",\"includeMarkdown\":true,\"includeLinks\":true}'",
+      "cost": {
+        "type": "per_call",
+        "table": [
+          {
+            "when": {
+              "body.includeMarkdown": true
+            },
+            "value": 10
+          },
+          {
+            "when": {
+              "body.includeMarkdown": false
+            },
+            "value": 10
+          }
+        ],
+        "fallback": {
+          "value": 10,
+          "note": "Serper documents 10 credits as the hardest-page ceiling; page difficulty is unknowable before relay, so every platform call reserves that ceiling."
+        },
+        "currency": "credit",
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://serper.dev/playground",
+        "checked": "2026-09-24",
+        "confidence": "verified",
+        "note": "Serper documents 2, 6, or 10 credits by scrape difficulty and returns the exact value in response.credits. treg reserves 10, settles the reported value, and releases the rest; the live example.com probe cost 2 credits.",
+        "reported_charge": {
+          "path": "credits",
+          "unit": "credit"
+        },
+        "table_min": 10.0,
+        "usd": 0.01,
+        "usd_min": 0.01
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-24",
+      "added": "2026-09-24",
+      "docs_url": "https://serper.dev/playground",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "includeMarkdown": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "includeImages": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "includeLinks": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "includeVideos": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          }
+        },
+        "note": "This endpoint uses scrape.serper.dev rather than google.serper.dev. Serper reports the exact charge in response.credits: most pages cost 2 credits, with harder pages costing 6 or 10."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "includeMarkdown": true,
+          "includeLinks": true
+        }
+      },
+      "observed": {
+        "samples": 398,
+        "decided": 320,
+        "ok_rate": 0.6188,
+        "p50_ms": 1040,
+        "p95_ms": 8604,
+        "last_ok_days": 0,
+        "hit_rate": 1.0,
+        "hit_samples": 196
+      }
+    },
+    {
+      "id": "spidercloud.web.scrape",
+      "provider": "spidercloud",
+      "provider_display": "Spider",
+      "name": "Scrape a web page",
+      "summary": "Fetch a specified page as Markdown, text, or raw HTML.",
+      "method": "POST",
+      "path": "/scrape",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call spidercloud.web.scrape --method POST --data '{\"url\":\"https://example.com\",\"return_format\":\"markdown\",\"request\":\"http\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": null,
+        "currency": "USD",
+        "unit": "call",
+        "source": "observed",
+        "source_url": "https://spider.cloud/pricing/",
+        "checked": "2026-09-29",
+        "confidence": "unknown",
+        "note": "Spider bills variable bandwidth and compute and reports each page's USD total in costs.total_cost. The API budget fields did not establish a safe shared-key reserve. BYOK calls are unmetered by treg.",
+        "usd": null
+      },
+      "async": null,
+      "platform_eligible": false,
+      "platform_blocked": "Spider's bandwidth and compute charge varies with the target, and its API credit cap was not verified as a spending bound; connect your own Spider key.",
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-29",
+      "added": "2026-09-29",
+      "docs_url": "https://spider.cloud/docs/api/scrape/",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "string",
+            "required": true,
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "return_format": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "markdown",
+              "text",
+              "raw"
+            ],
+            "example": "markdown"
+          },
+          "request": {
+            "type": "string",
+            "required": false,
+            "enum": [
+              "http",
+              "smart",
+              "browser"
+            ],
+            "example": "http"
+          },
+          "max_size": {
+            "type": "integer",
+            "required": false,
+            "min": 1,
+            "max": 1000000
+          },
+          "cache": {
+            "type": "boolean",
+            "required": false
+          }
+        }
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "url": "https://example.com",
+          "return_format": "markdown",
+          "request": "http"
+        }
+      },
+      "observed": {
+        "samples": 0,
+        "decided": 0,
+        "ok_rate": null,
+        "p50_ms": null,
+        "p95_ms": null,
+        "last_ok_days": null,
+        "hit_rate": null,
+        "hit_samples": 0
+      }
+    },
+    {
+      "id": "tavily.web.extract",
+      "provider": "tavily",
+      "provider_display": "Tavily",
+      "name": "Extract web pages",
+      "summary": "Extract clean content from one to twenty URLs, with optional query-focused chunks and images.",
+      "method": "POST",
+      "path": "/extract",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call tavily.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"extract_depth\":\"basic\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 0.4,
+        "table_min": 0.2,
+        "currency": "credit",
+        "per": 1,
+        "unit": "result",
+        "tavily_rates": {
+          "basic": 0.2,
+          "advanced": 0.4
+        },
+        "source": "docs",
+        "source_url": "https://docs.tavily.com/documentation/api-credits",
+        "checked": "2026-09-22",
+        "confidence": "documented",
+        "note": "Basic is 0.2 credit per successful extraction; Advanced is 0.4. Platform reserve uses requested URLs, selected depth, and the 20-URL maximum, then settlement counts valid results only. failed_results and grouped usage.credits do not charge the caller; BYOK is unmetered.",
+        "usd": 0.0032,
+        "usd_min": 0.0016
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-21",
+      "added": "2026-09-21",
+      "docs_url": "https://docs.tavily.com/documentation/api-reference/endpoint/extract",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 20,
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "required": false,
+            "note": "Rerank extracted chunks for this query."
+          },
+          "chunks_per_source": {
+            "type": "integer",
+            "required": false,
+            "default": 3,
+            "min": 1,
+            "max": 5
+          },
+          "extract_depth": {
+            "type": "string",
+            "required": false,
+            "default": "basic",
+            "enum": [
+              "basic",
+              "advanced"
+            ],
+            "example": "basic"
+          },
+          "include_images": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_favicon": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "format": {
+            "type": "string",
+            "required": false,
+            "default": "markdown",
+            "enum": [
+              "markdown",
+              "text"
+            ]
+          },
+          "timeout": {
+            "type": "number",
+            "required": false,
+            "min": 1,
+            "max": 60
+          }
+        },
+        "note": "Failed URLs appear in failed_results and are not charged. Every successful Basic extraction is allocated 0.2 credit; Advanced is 0.4 credit. Platform settlement counts this call's results and ignores grouped usage.credits."
+      },
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "extract_depth": "basic"
+        }
+      },
+      "observed": {
+        "samples": 9123,
+        "decided": 9046,
+        "ok_rate": 0.9998,
+        "p50_ms": 870,
+        "p95_ms": 16441,
+        "last_ok_days": 0,
+        "hit_rate": 0.7043,
+        "hit_samples": 9046
+      },
+      "reviews": {
+        "teams": 0,
+        "samples": [
+          {
+            "usefulness": "not_useful",
+            "reason": "Both SCC pages failed to fetch, so the call returned no content.",
+            "client": "mcp",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tinyfish.web.fetch",
+      "provider": "tinyfish",
+      "provider_display": "TinyFish",
+      "name": "Fetch clean page content",
+      "summary": "Fetch up to ten URLs as Markdown, HTML, or structured JSON, with optional links, metadata, and selectors.",
+      "method": "POST",
+      "path": "/",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call tinyfish.web.fetch --method POST --data '{\"urls\":[\"https://example.com\"],\"format\":\"markdown\",\"links\":true,\"ttl\":0}'",
+      "cost": {
+        "type": "free",
+        "value": 0,
+        "currency": "USD",
+        "unit": "call",
+        "source": "docs",
+        "source_url": "https://www.tinyfish.ai/pricing",
+        "checked": "2026-09-23",
+        "confidence": "verified",
+        "note": "TinyFish lists Fetch at $0.00 per URL; a live fetch left the wallet unchanged.",
+        "usd": 0.0
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "not_found": {
+        "status": 200,
+        "means": "the site itself answered 404: the page does not exist"
+      },
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-23",
+      "added": "2026-09-23",
+      "docs_url": "https://docs.tinyfish.ai/api-reference/fetch-and-extract-content-from-urls",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 10,
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "purpose": {
+            "type": "string",
+            "required": false
+          },
+          "format": {
+            "type": "string",
+            "required": false,
+            "default": "markdown",
+            "enum": [
+              "html",
+              "markdown",
+              "json"
+            ]
+          },
+          "links": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "image_links": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "page_metadata": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "ttl": {
+            "type": "integer",
+            "required": false,
+            "min": 0,
+            "note": "TinyFish cache lifetime in seconds; 0 requests a fresh fetch."
+          },
+          "per_url_timeout_ms": {
+            "type": "integer",
+            "required": false,
+            "min": 1
+          },
+          "if_none_match": {
+            "type": "string",
+            "required": false
+          },
+          "if_modified_since": {
+            "type": "string",
+            "required": false
+          },
+          "include_etag_and_last_modified": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+          },
+          "include_selectors": {
+            "type": "array[string]",
+            "required": false
+          },
+          "exclude_selectors": {
+            "type": "array[string]",
+            "required": false
+          }
+        }
+      },
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "format": "markdown",
+          "links": true,
+          "ttl": 0
+        }
+      },
+      "observed": {
+        "samples": 246662,
+        "decided": 226275,
+        "ok_rate": 0.9943,
+        "p50_ms": 2416,
+        "p95_ms": 16467,
+        "last_ok_days": 0,
+        "hit_rate": 0.993,
+        "hit_samples": 162683
+      },
+      "reviews": {
+        "teams": 50,
+        "samples": [
+          {
+            "usefulness": "partly",
+            "reason": "Law-firm and regulator pages fetched cleanly; the VARA rulebook page only returned the table of contents (sub-pages are JS-navigated).",
+            "client": "mcp",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Fresh public website content and metadata recovered despite local GET403; current page claims distinguished from independent verification.",
+            "client": "cli",
+            "month": "2026-10"
+          },
+          {
+            "usefulness": "useful",
+            "reason": "Free fetch returned Balluta Water Sport's full jet ski and safari price lists plus their rider rules, and the St Julian's St George's Bay supplier's what-to-bring and deposit terms.",
+            "client": "mcp",
+            "month": "2026-10"
+          }
+        ],
+        "share": {
+          "useful": 0.77,
+          "partly": 0.22,
+          "not_useful": 0.01
+        }
+      }
+    },
+    {
+      "id": "treg.web.extract",
+      "provider": "treg",
+      "provider_display": "treg",
+      "name": "web.extract — routed: best of 15 providers, own keys first",
+      "summary": "Extract clean content from one web page — provider-native rows in `pages`",
+      "method": "POST",
+      "path": "/web.extract",
+      "scope": "",
+      "tier": "core",
+      "kind": "routed",
+      "domain": "extract",
+      "call_template": "treg call treg.web.extract --method POST --data '{\"url\":\"…\"}'",
+      "cost": {
+        "type": "per_success",
+        "value": 0.0,
+        "currency": "USD",
+        "per": 1,
+        "unit": "call",
+        "source": "inferred",
+        "confidence": "documented",
+        "checked": null,
+        "varies": true,
+        "note": "NOT free: misses are billed too. the children's range $0–$0.01 per hit, 0% markup; you pay the child that served AND every child tried before it that bills a miss (5 of 15 do), up to X-Treg-Route-Max-Cost (default $1 a call). X-Treg-Route-Exclude them, or X-Treg-Route-Waterfall: 0, to pay for one provider only",
+        "usd": 0.0
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": {
+        "status": 200,
+        "means": "output.pages == []"
+      },
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": null,
+      "added": null,
+      "docs_url": "",
+      "has_example": false,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "url": {
+            "type": "url",
+            "required": false,
+            "note": "identity key (part of url)"
+          }
+        },
+        "note": "Send everything you know about the subject — treg derives the rest (full_name ⇄ first+last), matches each provider on the variants it accepts ({url}) and sends each provider only the fields it wants. On a miss treg keeps trying providers, cheapest first, within X-Treg-Route-Max-Cost (default $1 per call; misses on per-success providers are free). Options ride as headers, never in the body: X-Treg-Route-Waterfall: 0 (stop at the first miss), X-Treg-Route-Max-Cost: <usd>, X-Treg-Route-Prefer / X-Treg-Route-Exclude: <provider>. The response is {output, raw, _treg: {served_by, tried}}; X-Treg-Served-By names the child."
+      },
+      "test_request": {
+        "body": {
+          "url": "…"
+        }
+      },
+      "routed_children": [
+        "anyapi.web.scrape",
+        "branddev.web.scrape",
+        "crawl4ai.web.scrape",
+        "exa.web.contents.get",
+        "firecrawl.web.scrape",
+        "keenable.web.fetch",
+        "linkup.web.fetch",
+        "olostep.web.scrape",
+        "parallel.web.extract",
+        "scrapegraphai.web.scrape",
+        "search1api.web.crawl",
+        "serper.web.extract",
+        "tavily.web.extract",
+        "tinyfish.web.fetch",
+        "you.web.contents"
+      ],
+      "observed": {
+        "samples": 161838,
+        "decided": 155458,
+        "ok_rate": 0.8862,
+        "p50_ms": null,
+        "p95_ms": null,
+        "last_ok_days": 0,
+        "hit_rate": null,
+        "hit_samples": 0
+      }
+    },
+    {
+      "id": "valyu.web.contents",
+      "provider": "valyu",
+      "provider_display": "Valyu",
+      "name": "Extract a web page",
+      "summary": "Return clean content from one public URL.",
+      "method": "POST",
+      "path": "/v1/contents",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call valyu.web.contents --method POST --data '{\"urls\":[\"https://example.com\"],\"summary\":false,\"response_length\":\"short\",\"max_price_dollars\":0.01}'",
+      "cost": {
+        "type": "per_call",
+        "value": 0.001,
+        "currency": "credit",
+        "unit": "call",
+        "settle": "usage",
+        "usage": {
+          "path": "total_cost_dollars",
+          "unit": "credit"
+        },
+        "fallback": {
+          "value": 0.001,
+          "note": "One requested URL at the documented raw extraction price."
+        },
+        "source": "observed",
+        "source_url": "https://docs.valyu.ai/api-reference/endpoint/contents",
+        "checked": "2026-09-30",
+        "confidence": "verified",
+        "note": "One successful URL cost 0.001 credit live; failed URLs have no extraction charge.",
+        "usd": 0.001
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": null,
+      "added": "2026-09-29",
+      "docs_url": "https://docs.valyu.ai/api-reference/endpoint/contents",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 1,
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "summary": {
+            "type": "boolean",
+            "required": true,
+            "enum": [
+              false
+            ]
+          },
+          "response_length": {
+            "type": "string",
+            "required": true,
+            "enum": [
+              "short"
+            ]
+          },
+          "max_price_dollars": {
+            "type": "number",
+            "required": false,
+            "min": 0.001,
+            "max": 0.01
+          }
+        },
+        "note": "This one-URL raw extraction excludes AI processing and asynchronous jobs."
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "summary": false,
+          "response_length": "short",
+          "max_price_dollars": 0.01
+        }
+      },
+      "observed": {
+        "samples": 63,
+        "decided": 60,
+        "ok_rate": 1.0,
+        "p50_ms": 1586,
+        "p95_ms": 16248,
+        "last_ok_days": 2,
+        "hit_rate": null,
+        "hit_samples": 0
+      }
+    },
+    {
+      "id": "you.web.contents",
+      "provider": "you",
+      "provider_display": "You.com",
+      "name": "Extract page content",
+      "summary": "Retrieve Markdown, HTML or metadata for up to ten public URLs.",
+      "method": "POST",
+      "path": "/v1/contents",
+      "scope": "any_account",
+      "tier": "core",
+      "kind": "data",
+      "domain": "extract",
+      "call_template": "treg call you.web.contents --method POST --data '{\"urls\":[\"https://example.com\"],\"formats\":[\"markdown\"]}'",
+      "cost": {
+        "type": "per_result",
+        "value": 0.001,
+        "currency": "USD",
+        "unit": "page",
+        "source": "docs",
+        "source_url": "https://you.com/docs/administration/billing",
+        "checked": "2026-09-29",
+        "confidence": "documented",
+        "note": "$0.001 per page fetched; the hold follows the requested URL count and settles from the returned page count.",
+        "usd": 0.001
+      },
+      "async": null,
+      "platform_eligible": true,
+      "platform_blocked": null,
+      "miss": null,
+      "status": null,
+      "status_note": null,
+      "superseded_by": null,
+      "verified": "2026-09-29",
+      "added": "2026-09-29",
+      "docs_url": "https://you.com/docs/api-reference/contents",
+      "has_example": true,
+      "input": {
+        "bodyType": "json",
+        "body": {
+          "urls": {
+            "type": "array[string]",
+            "required": true,
+            "minItems": 1,
+            "maxItems": 10,
+            "example": [
+              "https://example.com"
+            ]
+          },
+          "formats": {
+            "type": "array[string]",
+            "required": false,
+            "enum": [
+              "html",
+              "markdown",
+              "metadata"
+            ],
+            "example": [
+              "markdown"
+            ]
+          },
+          "crawl_timeout": {
+            "type": "integer",
+            "required": false,
+            "default": 10,
+            "min": 1,
+            "max": 60
+          },
+          "max_age": {
+            "type": "integer",
+            "required": false,
+            "min": 0,
+            "note": "Maximum age of cached content in seconds."
+          }
+        }
+      },
+      "body_allowlist": true,
+      "test_request": {
+        "body": {
+          "urls": [
+            "https://example.com"
+          ],
+          "formats": [
+            "markdown"
+          ]
+        }
+      },
+      "observed": {
+        "samples": 10026,
+        "decided": 10026,
+        "ok_rate": 0.9962,
+        "p50_ms": 1494,
+        "p95_ms": 16133,
+        "last_ok_days": 0,
+        "hit_rate": 0.712,
+        "hit_samples": 10013
+      }
+    }
+  ],
+  "related_capabilities": [
+    {
+      "endpoint_id": "treg.web.anchors.list",
+      "capability": "web.anchors.list",
+      "does": "List the anchor texts used"
+    },
+    {
+      "endpoint_id": "treg.web.backlinks.list",
+      "capability": "web.backlinks.list",
+      "does": "List individual backlinks to a target"
+    },
+    {
+      "endpoint_id": "treg.web.backlinks.summary",
+      "capability": "web.backlinks.summary",
+      "does": "Backlink profile of a domain or URL"
+    },
+    {
+      "endpoint_id": "treg.web.extract.structured",
+      "capability": "web.extract.structured",
+      "does": "Extract typed JSON from one web page"
+    },
+    {
+      "endpoint_id": "treg.web.map",
+      "capability": "web.map",
+      "does": "Discover the URLs on a website"
+    }
+  ],
+  "call_template": "treg call parallel.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"advanced_settings\":{\"full_content\":true}}'",
+  "example_response": {
+    "extract_id": "extract_d168aab96c82bb6f4354534e742f59fe",
+    "results": [
+      {
+        "url": "https://example.com",
+        "title": "Example Domain",
+        "publish_date": null,
+        "excerpts": [
+          "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\n[Learn more](https://iana.org/help/example-domains)"
+        ],
+        "full_content": "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\n[Learn more](https://iana.org/help/example-domains)"
+      }
+    ],
+    "errors": [],
+    "warnings": [
+      {
+        "type": "warning",
+        "message": "Neither objective nor search_queries were provided, provide at least one to increase the relevance of excerpts.",
+        "detail": null
+      }
+    ],
+    "usage": [
+      {
+        "name": "sku_extract_excerpts",
+        "count": 1
+      }
+    ],
+    "metadata": null,
+    "session_id": "session_d168aab96c82bb6f4354534e742f59fe"
+  },
+  "hints": [
+    "treg call parallel.web.extract --method POST --data '{\"urls\":[\"https://example.com\"],\"advanced_settings\":{\"full_content\":true}}'   # run it — key injected server-side",
+    "treg catalog get anyapi.web.scrape   # the same job from anyapi"
+  ]
+}

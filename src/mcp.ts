@@ -1,10 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { VERSION, searchCatalog, getEndpoint, callEndpoint, doctor, safeMessage, type CallOptions } from './index.js';
+import { VERSION, searchCatalog, getEndpoint, callEndpoint, doctor, safeMessage, capOutput, type CallOptions } from './index.js';
 async function result(run: () => Promise<unknown>) {
-  try { return { content: [{ type: 'text' as const, text: safeMessage(JSON.stringify(await run())) }] }; }
-  catch (error) { return { isError: true, content: [{ type: 'text' as const, text: safeMessage(error) }] }; }
+  try { return { content: [{ type: 'text' as const, text: safeMessage(JSON.stringify(capOutput(await run()))) }] }; }
+  catch (error) { return { isError: true, content: [{ type: 'text' as const, text: safeMessage(JSON.stringify(capOutput({ error: safeMessage(error) }))) }] }; }
 }
 export function createMcpServer(options: Pick<CallOptions, 'guards'> = {}) {
   const server = new McpServer({ name: 'agentic-treg', version: VERSION });

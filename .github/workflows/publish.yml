@@ -21,7 +21,9 @@ jobs:
       - run: npm test
       - name: Publish new version
         run: |
-          if npm view agentic-treg@0.1.0 version >/dev/null 2>&1; then
+          NAME=$(node -p "require('./package.json').name")
+          VER=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VER" version >/dev/null 2>&1; then
             echo 'Version already published.'
           else
             npm publish --access public

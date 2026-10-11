@@ -1,7 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { callEndpoint, searchCatalog, getEndpoint, getBalance, doctor, VendorError, GuardError, createGuards } from './index.js';
+import { callEndpoint, searchCatalog, getEndpoint, getBalance, doctor, parsePrice, VendorError, GuardError, createGuards } from './index.js';
 const mock = vi.fn<typeof fetch>();
-const detail = { endpoint: { id: 'sample.data', method: 'GET', cost: { usd: 0.001 } } };
+const detail = { endpoint: { id: 'sample.data', method: 'GET', cost: { type: 'per_call', value: 0.001, currency: 'USD', per: 1, unit: 'call' } } };
 const json = (data: unknown, status = 200, headers = {}) => new Response(JSON.stringify(data), { status, headers });
 beforeEach(() => { vi.stubGlobal('fetch', mock); vi.stubEnv('TREG_TOKEN', ''); vi.stubEnv('TREG_ORG_ID', ''); mock.mockReset(); });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
@@ -25,6 +26,7 @@ test('anonymous live calls omit the token header', async () => {
 test('caps multibyte result data at 4000 bytes and marks truncation', async () => {
   mock.mockResolvedValueOnce(json(detail)).mockResolvedValueOnce(json({ text: '😀'.repeat(2000) }));
   const result = await callEndpoint('sample.data', {}, { dryRun: false });
+  if (!('data' in result)) throw new Error('Expected live result.');
   expect(result.truncated).toBe(true);
   expect(Buffer.byteLength(result.data as string)).toBeLessThanOrEqual(4000);
   expect(Buffer.byteLength(JSON.stringify(result.data))).toBeLessThanOrEqual(4000);
@@ -78,4 +80,16 @@ test('balance discovers one org and refuses ambiguous selection', async () => {
 test('doctor reports unset token and balance failure explicitly', async () => {
   mock.mockResolvedValueOnce(json({ public_url: 'https://treg.to' })).mockResolvedValueOnce(json({ detail: 'not authenticated' }, 401));
   expect(await doctor()).toMatchObject({ token: 'unset', reachable: true, ok: false, balanceError: 'HTTP 401: {"detail":"not authenticated"}' });
+});
+
+test('accepts the public detail fixture price shape', async () => {
+  const fixture = JSON.parse(readFileSync(new URL('./detail.fixture.json', import.meta.url), 'utf8'));
+  mock.mockResolvedValueOnce(json(fixture)).mockResolvedValueOnce(json({ ok: true }));
+  expect(await callEndpoint(fixture.endpoint.id, {}, { dryRun: false })).toMatchObject({ price: { value: fixture.endpoint.cost.value, currency: 'USD' }, cost: fixture.endpoint.cost });
+});
+test.each([undefined, {}, { value: '1' }, { value: NaN }, { value: Infinity }, { value: 1, currency: 'EUR' }])('rejects invalid price %j', cost => {
+  expect(() => parsePrice(cost)).toThrow(VendorError);
+});
+test('defaults absent currency to USD', () => {
+  expect(parsePrice({ value: 0 })).toEqual({ value: 0, currency: 'USD' });
 });
