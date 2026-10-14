@@ -70,11 +70,13 @@ Requests have a thirty-second timeout, reject redirects, and have no automatic r
 Live-call data and CLI/MCP output are capped at 4,000 serialized UTF-8 bytes; oversized data becomes a text fragment.
 Charge headers can be absent. The client does not supply its own billing ledger or idempotency key.
 Error text replaces exact occurrences of the configured token; this does not guarantee redaction of every secret format.
+
 ## Status and development
 
 Version 0.1.0 is an early release; APIs can change before 1.0. Public case studies are not yet published.
 Use [GitHub issues](https://github.com/pooriaarab/agentic-treg/issues) for support and [Treg](https://treg.to) for service information.
 For development, run `npm ci`, `npm run build`, `npm run typecheck`, `npm test`, then `npm pack`.
+
 ## License
 
 MIT.
