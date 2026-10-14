@@ -47,6 +47,7 @@ console.log(await callEndpoint('demo.endpoint', { query: 'hello' }));
 | Integration | Status | Scope |
 | --- | --- | --- |
 | Treg (`https://treg.to`) | Implemented; live verification pending | Catalog, routed calls, organization balance, service metadata |
+
 The code integrates with one remote service. It contains no provider registry or provider-specific adapters.
 Catalog capabilities and prices come from Treg; this package does not establish a fixed coverage count.
 Mocked tests and the local preview are verified. This campaign performs zero live credential checks.
