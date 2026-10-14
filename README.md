@@ -1,106 +1,82 @@
 # agentic-treg
 
-Route live data through a catalog with a CLI, npm library, and MCP server.
+[![npm version](https://img.shields.io/npm/v/agentic-treg)](https://www.npmjs.com/package/agentic-treg)
+[![Downloads/month](https://img.shields.io/npm/dm/agentic-treg)](https://www.npmjs.com/package/agentic-treg)
+[![MIT license](https://img.shields.io/npm/l/agentic-treg)](https://opensource.org/license/mit)
+
+[Treg docs](https://treg.to/tutorial) · [API reference](https://treg.to/docs) · [llms.txt](https://treg.to/llms.txt) · [Package](https://www.npmjs.com/package/agentic-treg) · [Support](https://github.com/pooriaarab/agentic-treg/issues)
+
+agentic-treg is an open-source Treg catalog client with endpoint discovery, call previews, a TypeScript API, CLI, and Model Context Protocol (MCP) server.
+
+## Install
 
 ```sh
 npm install agentic-treg
 ```
 
-Preview a call without network access.
+Use Node.js 18 or later. TypeScript declarations are included. The package has three direct runtime dependencies.
+Use Node.js 20 or later for development.
+
+## Preview your first call
 
 ```sh
-npx agentic-treg call treg.web.extract --params '{"url":"https://example.com"}'
+npx agentic-treg call demo.endpoint --params '{"query":"hello"}'
 ```
 
-## Usecases
+Expect exit code 0 and this JSON:
 
-1. Find an endpoint for a data request.
-2. Inspect parameters and price before a call.
-3. Route a live request and read its charge.
-
-## CLI
-
-Search the free catalog.
-
-```sh
-npx agentic-treg search "search results"
-npx agentic-treg get treg.web.extract
-npx agentic-treg doctor
-npx agentic-treg balance
+```json
+{"dryRun":true,"id":"demo.endpoint","params":{"query":"hello"},"maxCostUsd":1,"network":false}
 ```
 
-Search performs a free live catalog lookup.
-Calls default to previews with no network access.
-Set `TREG_TOKEN` for authenticated access.
-Omit it for anonymous access where allowed.
-The service may refuse anonymous calls.
-Set `TREG_ORG_ID` when balance discovery finds multiple organizations.
-Run `doctor` to read token status, reachability, and balance errors.
-Doctor exits with failure when any check fails.
-
-Pass `--live` to execute a call.
-Live calls fetch endpoint details before spending.
-The default live ceiling is one dollar per call.
-The response includes the published price as `{value, currency}`, raw `cost`, and charged microdollars.
-
-```sh
-npx agentic-treg call treg.web.extract --params '{"url":"https://example.com"}' --live
-```
-
-## Library
+This example requires no credentials or network access. `demo.endpoint` is a placeholder, not a verified catalog entry.
+Preview confirms local parameter handling; it does not validate endpoint existence, price, or inputs.
 
 ```js
-import { searchCatalog, getEndpoint, callEndpoint, getBalance, doctor } from 'agentic-treg';
-
-await searchCatalog('search results');
-await getEndpoint('treg.web.extract');
-await callEndpoint('treg.web.extract', { url: 'https://example.com' });
-await callEndpoint('treg.web.extract', { url: 'https://example.com' }, { dryRun: false, maxCostUsd: 0.1 });
-await getBalance();
-await doctor();
+import { callEndpoint } from 'agentic-treg';
+console.log(await callEndpoint('demo.endpoint', { query: 'hello' }));
 ```
 
-Pass plain parameters for simple queries or JSON bodies.
-Pass `{ queryParams, pathParams, body }` for mixed inputs.
-Read endpoint details to choose the correct input shape.
-Live calls use the catalog method.
-CLI outputs and all MCP tool results retain up to 4000 UTF-8 bytes of custom data.
-Library live call results use the same cap.
-Oversized data becomes a text fragment with `truncated: true`.
-HTTP and vendor failures throw `VendorError` from the shared core.
-Pass core guards through the library call options.
-A denied guard prevents all network activity.
+## Features and coverage
 
-## MCP
+- **Discovery:** Search the remote catalog and inspect endpoint methods, inputs, and published prices.
+- **Preview:** Inspect call parameters without network access; execution requires an explicit live option.
+- **Live calls:** Read endpoint details, dispatch the catalog method, and return charge headers when provided.
+- **Diagnostics:** Report token status, service reachability, and organization balance.
 
-```sh
-npx agentic-treg mcp
-```
+| Integration | Status | Scope |
+| --- | --- | --- |
+| Treg (`https://treg.to`) | Implemented; live verification pending | Catalog, routed calls, organization balance, service metadata |
 
-Use `agentic-treg-mcp` as the dedicated stdio entry.
-Call `treg_search`, `treg_get`, `treg_call`, or `treg_doctor`.
-Set `live: true` explicitly to execute `treg_call`.
-The call tool declares destructive behavior because endpoints may write data.
+The code integrates with one remote service. It contains no provider registry or provider-specific adapters.
+Catalog capabilities and prices come from Treg; this package does not establish a fixed coverage count.
+Mocked tests and the local preview are verified. This campaign performs zero live credential checks.
 
-## Defaults
+## Runtime surfaces and limits
 
-Use Node 18 or newer.
-Requests time out after thirty seconds.
-Requests reject redirects and perform no automatic retries.
-Balance discovery selects only a single available organization.
-Tokens never appear in diagnostics.
-The catalog controls available capabilities and prices.
+CLI commands: `search`, `get`, `call`, `balance`, `doctor`, `mcp`, `help`, and `version`.
+Use `--help`/`-h` or `--version`/`-V` for those operations.
+Start stdio MCP with `npx agentic-treg mcp` or `npx agentic-treg-mcp`.
+MCP tools: `treg_search`, `treg_get`, `treg_call`, and `treg_doctor`.
+Search, endpoint inspection, balance, and doctor make network requests. Only call previews are network-free.
+Export `TREG_TOKEN` for authenticated requests; anonymous access depends on the service.
+Set numeric `TREG_ORG_ID` when organization selection is ambiguous. The package does not load `.env` files.
+Inspect `get <id>` before `call <id> --params '<JSON>' --live`; live calls can spend or change remote data.
+SDK `callEndpoint` accepts `dryRun: false`, shared core `guards`, and `maxCostUsd` options.
+The default ceiling is USD 1, sent as `X-Treg-Route-Max-Cost`; enforcement depends on Treg.
+Published prices must be numeric and use USD when currency is specified.
+Structured parameters accept `queryParams`, `pathParams`, and `body`; path parameters are forwarded as query fields.
+Requests have a thirty-second timeout, reject redirects, and have no automatic retries.
+Live-call data and CLI/MCP output are capped at 4,000 serialized UTF-8 bytes; oversized data becomes a text fragment.
+Charge headers can be absent. The client does not supply its own billing ledger or idempotency key.
+Error text replaces exact occurrences of the configured token; this does not guarantee redaction of every secret format.
 
-## Development
+## Status and development
 
-Use Node 20 or newer for development.
+Version 0.1.0 is an early release; APIs can change before 1.0. Public case studies are not yet published.
+Use [GitHub issues](https://github.com/pooriaarab/agentic-treg/issues) for support and [Treg](https://treg.to) for service information.
+For development, run `npm ci`, `npm run build`, `npm run typecheck`, `npm test`, then `npm pack`.
 
-```sh
-npm ci
-npm run build
-npm run typecheck
-npm test
-npm pack
-```
+## License
 
-MIT license.
+MIT.
